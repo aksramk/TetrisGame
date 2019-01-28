@@ -1,0 +1,28 @@
+{
+  "name": "tetrisgame",
+  "version": "1.0.0",
+  "description": "Tetris Game UI",
+  "main": "TetrisUI.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.12.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.15.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aksramk/TetrisGame.git"
+  },
+  "author": "Akshar Ramkumar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aksramk/TetrisGame/issues"
+  },
+  "homepage": "https://github.com/aksramk/TetrisGame#readme"
+}
