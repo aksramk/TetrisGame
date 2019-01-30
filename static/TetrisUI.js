@@ -154,13 +154,73 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 
 }
 
+function drawTetronimoI(startX = 3, startY=0){
+    tetrisWell[startX][startY] = 1;
+    tetrisWell[startX+1][startY] = 1;
+    tetrisWell[startX+2][startY] = 1;
+    tetrisWell[startX+3][startY] = 1;
+    dropFinished=false;
+    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+3,startY]];
+    return 0;
+}
+
+function drawTetronimoJ(startX = 3, startY=0){
+    tetrisWell[startX][startY] = 2;
+    tetrisWell[startX+1][startY] = 2;
+    tetrisWell[startX+2][startY] = 2;
+    tetrisWell[startX+2][startY+1] = 2;
+    dropFinished=false;
+    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+2,startY+1]];
+    return 0;
+}
+
+function drawTetronimoL(startX = 3, startY=0){
+    tetrisWell[startX][startY] = 3;
+    tetrisWell[startX+1][startY] = 3;
+    tetrisWell[startX+2][startY] = 3;
+    tetrisWell[startX][startY+1] = 3;
+    dropFinished=false;
+    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX,startY+1]];
+    return 0;
+}
+
 function drawTetronimoO(startX = 4, startY=0){
     tetrisWell[startX][startY] = 4;
     tetrisWell[startX+1][startY] = 4;
     tetrisWell[startX][startY+1] = 4;
     tetrisWell[startX+1][startY+1] = 4;
     dropFinished=false;
-    dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX,startY], [startX+1,startY]];
+    dropBlock = [[startX,startY], [startX+1,startY],[startX,startY+1], [startX+1,startY+1]];
+    return 0;
+}
+
+function drawTetronimoS(startX = 3, startY=0){
+    tetrisWell[startX+1][startY] = 5;
+    tetrisWell[startX][startY+1] = 5;
+    tetrisWell[startX+1][startY+1] = 5;
+    tetrisWell[startX+2][startY] = 5;
+    dropFinished=false;
+    dropBlock = [[startX+1,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY]];
+    return 0;
+}
+
+function drawTetronimoT(startX = 3, startY = 0){
+    tetrisWell[startX][startY] = 6;
+    tetrisWell[startX+1][startY] = 6;
+    tetrisWell[startX+1][startY+1] = 6;
+    tetrisWell[startX+2][startY] = 6;
+    dropFinished=false;
+    dropBlock = [[startX,startY], [startX+1,startY],[startX+1,startY+1], [startX+2,startY]];
+    return 0;
+}
+
+function drawTetronimoZ(startX = 3, startY=0){
+    tetrisWell[startX][startY] = 7;
+    tetrisWell[startX+1][startY] = 7;
+    tetrisWell[startX+1][startY+1] = 7;
+    tetrisWell[startX+2][startY+1] = 7;
+    dropFinished=false;
+    dropBlock = [[startX,startY], [startX+1,startY],[startX+1,startY+1], [startX+2,startY+1]];
     return 0;
 }
 
@@ -177,8 +237,9 @@ function dropTetronimo(coordinates){
         x = tuple[0];
         y = tuple[1];
         ifImportant = includesList(coordinates, [x,y+1]);
+        ifDown = includesList(coordinates, [x,y-1]);
 
-        if((y===19) || (y==18 && ifImportant)){
+        if((y===19)){
             dropFinished = true;
             tempTetrisWell = [];
             return 0;
@@ -191,7 +252,9 @@ function dropTetronimo(coordinates){
         
         if(dropFinished===false){
             num = tempTetrisWell[x][y];
-            tempTetrisWell[x][y]=0;
+            if(!ifDown){
+                tempTetrisWell[x][y]=0;
+            }
             tempTetrisWell[x][y+1]= num;
             if(ifImportant){
                 tempTetrisWell[x][y+2]=num;
@@ -199,72 +262,109 @@ function dropTetronimo(coordinates){
             tempDropBlock.push([x,y+1]);
         }
     }
-    tetrisWell = tempTetrisWell;
+    tetrisWell = JSON.parse(JSON.stringify(tempTetrisWell));
     tempTetrisWell = [];
-    dropBlock = tempDropBlock;
+    dropBlock = JSON.parse(JSON.stringify(tempDropBlock));
     return 1;
 }
 
 function moveTetronimo(coordinates, goingRight){
-    tempTetrisWell = tetrisWell;
+    tempTetrisWell = JSON.parse(JSON.stringify(tetrisWell));
     length = coordinates.length;
     var tempDropBlock = [];
     var x;
     var y;
     var tuple;
     var ifImportant;
-    for(k=0; k<length; k++){
-        tuple = coordinates[k];
+    var ifLeft;
+    var perm = -1972;
+    var ifRight;
+    for(coordList=0; coordList<length; coordList++){
+        tuple = coordinates[coordList];
         x = tuple[0];
         y = tuple[1];
+        if(x>perm){
+            perm = x;
+        }
         go = true;
         if (goingRight){
             ifImportant = includesList(coordinates, [x+1,y]);
+            ifLeft = includesList(coordinates, [x-1,y]);
         }
         
         if (!goingRight){
             ifImportant = includesList(coordinates, [x-1,y]);
+            ifRight = includesList(coordinates, [x+1,y]);
         }
 
-        if(((x===9)&&goingRight) || ((x===8)&&goingRight&&ifImportant)){
+        if(((x===9)&&goingRight)){
+            go = false;
+
+            return 0;
+        }
+        if((x===8)&&goingRight&&ifImportant){
             go = false;
             return 0;
         }
         
-        if(((x===0)&&(!goingRight)) || ((x===1)&&(!goingRight)&&ifImportant)){
+        if((x===0)&&(!goingRight)){
             go = false;
             return 0;
         }
         
-        if(tetrisWell[x][y+1]!==0 && ifImportant  && goingRight){
+        if((x===1)&&(!goingRight)&&ifImportant){
             go = false;
             return 0;
+        }
+        
+        if(goingRight){
+            if(tetrisWell[x+1][y]!==0 && !ifImportant){
+                go = false;
+                return 0;   
+            }
+        }
+        
+        
+        if(!goingRight){
+            if(tetrisWell[x-1][y]!==0 && !ifImportant){
+                go = false;
+                return 0;
+            }
             
         }
         
-        if(tetrisWell[x][y-1]!==0 && ifImportant  && !goingRight){
-            go = false;
-            return 0;
-            
-        }
         
-        if(go){
-            num = tempTetrisWell[x][y];
-            tempTetrisWell[x][y]=0;
+
+        
+        num = tempTetrisWell[x][y];
+        tempTetrisWell[x][y]=0;
+        if(goingRight){
             tempTetrisWell[x+1][y]= num;
-            if(ifImportant && goingRight){
-                tempTetrisWell[x+2][y]=num;
-            }
-            
-            if(ifImportant && !goingRight){
-                tempTetrisWell[x-2][y]=num;
-            }
-            
             tempDropBlock.push([x+1,y])
+            if (ifLeft){
+                tempTetrisWell[x][y]=num;
+            }
         }
+
+        if(!goingRight){
+            tempTetrisWell[x-1][y]= num;
+            tempDropBlock.push([x-1,y])
+            if (ifRight){
+                tempTetrisWell[x][y]=num;
+            }
+        }
+
+        if(ifImportant && goingRight){
+            tempTetrisWell[x+2][y]=num;
+        }
+
+        if(ifImportant && !goingRight){
+            tempTetrisWell[x-2][y]=num;
+        }
+
     }
-    tetrisWell = tempTetrisWell;
-    dropBlock = tempDropBlock;
+    tetrisWell = JSON.parse(JSON.stringify(tempTetrisWell));;
+    dropBlock = JSON.parse(JSON.stringify(tempDropBlock));
     return 0;
 }
 
@@ -325,26 +425,46 @@ function init(){
 }
 
 async function main(){
+    var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
     init();
     var a;
+    var n = 0;
     while(true){
-        drawTetronimoO();
+        funcNow = draws[Math.floor(Math.random()*draws.length)]
+        funcNow();
         render();
+        var timer = 0;
         while(true){
-            dropTetronimo(dropBlock);
-            moveTetronimo(dropBlock, true);
             render();
+            dropTetronimo(dropBlock);
             if(dropFinished){
                 break
             }
             await sleep(500);
         }
-        await sleep(500);
+        n++;
+        await sleep(10);
         
         
     }
 }
 document.addEventListener('DOMContentLoaded', domloaded, false);
+document.addEventListener("keydown", dealWithKeyboard, false);
+document.setInterval(render(), 100);
+function dealWithKeyboard(e){
+
+    switch(e.keyCode){
+        case 37:
+            moveTetronimo(dropBlock,false);
+            break;
+        case 39:
+            moveTetronimo(dropBlock,true)
+            break;
+            
+
+    }
+}
+
 async function domloaded(){
     main();
 }
