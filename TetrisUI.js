@@ -17,12 +17,14 @@ var tetrisPixelSize = height/20;
 var tetrisWell = []
 var dropFinished = false;
 var dropBlock = [];
+var time = 500;
+var change = false;
 for(i=0;i<10;i++){
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
 var tempTetrisWell = tetrisWell;
 var tempDropBlock = dropBlock;
-
+var dropPivot = []
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -39,7 +41,7 @@ function listsEqual(l1,l2){
 
 function includesList(bigList, subList){
     for(j=0; j<bigList.length; j++){
-        if(listsEqual(bigList[j],subList)){
+        if(listsEqual(bigList[j], subList)){
             return true
         }
 
@@ -161,26 +163,28 @@ function drawTetronimoI(startX = 3, startY=0){
     tetrisWell[startX+3][startY] = 1;
     dropFinished=false;
     dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+3,startY]];
+    dropCoordinate = [startX+1,startY];
     return 0;
 }
 
 function drawTetronimoJ(startX = 3, startY=0){
     tetrisWell[startX][startY] = 2;
-    tetrisWell[startX+1][startY] = 2;
-    tetrisWell[startX+2][startY] = 2;
+    tetrisWell[startX][startY+1] = 2;
+    tetrisWell[startX+1][startY+1] = 2;
     tetrisWell[startX+2][startY+1] = 2;
     dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+2,startY+1]];
+    dropBlock = [[startX,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY+1]];
     return 0;
 }
 
 function drawTetronimoL(startX = 3, startY=0){
-    tetrisWell[startX][startY] = 3;
-    tetrisWell[startX+1][startY] = 3;
-    tetrisWell[startX+2][startY] = 3;
     tetrisWell[startX][startY+1] = 3;
+    tetrisWell[startX+1][startY+1] = 3;
+    tetrisWell[startX+2][startY+1] = 3;
+    tetrisWell[startX+2][startY] = 3;
     dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX,startY+1]];
+    dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+2,startY+1], [startX+2,startY]];
+    dropPivot = [startX+1, startY+1];
     return 0;
 }
 
@@ -205,16 +209,16 @@ function drawTetronimoS(startX = 3, startY=0){
 }
 
 function drawTetronimoT(startX = 3, startY = 0){
-    tetrisWell[startX][startY] = 6;
-    tetrisWell[startX+1][startY] = 6;
+    tetrisWell[startX][startY+1] = 6;
     tetrisWell[startX+1][startY+1] = 6;
-    tetrisWell[startX+2][startY] = 6;
+    tetrisWell[startX+1][startY] = 6;
+    tetrisWell[startX+2][startY+1] = 6;
     dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX+1,startY+1], [startX+2,startY]];
+    dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+1,startY], [startX+2,startY+1]];
     return 0;
 }
 
-function drawTetronimoZ(startX = 3, startY=0){
+function drawTetronimoZ(startX = 3, startY = 0){
     tetrisWell[startX][startY] = 7;
     tetrisWell[startX+1][startY] = 7;
     tetrisWell[startX+1][startY+1] = 7;
@@ -265,6 +269,7 @@ function dropTetronimo(coordinates){
     tetrisWell = JSON.parse(JSON.stringify(tempTetrisWell));
     tempTetrisWell = [];
     dropBlock = JSON.parse(JSON.stringify(tempDropBlock));
+    dropPivot[1]++;
     return 1;
 }
 
@@ -339,6 +344,7 @@ function moveTetronimo(coordinates, goingRight){
         num = tempTetrisWell[x][y];
         tempTetrisWell[x][y]=0;
         if(goingRight){
+            dropPivot[0] = dropPivot[0]+1;
             tempTetrisWell[x+1][y]= num;
             tempDropBlock.push([x+1,y])
             if (ifLeft){
@@ -347,6 +353,7 @@ function moveTetronimo(coordinates, goingRight){
         }
 
         if(!goingRight){
+            dropPivot[0] = dropPivot[0]-1;
             tempTetrisWell[x-1][y]= num;
             tempDropBlock.push([x-1,y])
             if (ifRight){
@@ -366,6 +373,60 @@ function moveTetronimo(coordinates, goingRight){
     tetrisWell = JSON.parse(JSON.stringify(tempTetrisWell));;
     dropBlock = JSON.parse(JSON.stringify(tempDropBlock));
     return 0;
+}
+
+function rotateTetronimoBox(coordinates, pivotCoordinate){
+    var tempDropBlock = [];
+    var tempDropPivot = [];
+    var tempTetrisWell = JSON.parse(JSON.stringify(tetrisWell));
+    for (swivel = 0; swivel < coordinates.length; swivel++){
+        var coordinate = coordinates[swivel];
+        var x = coordinate[0];
+        var y = coordinate[1];
+        var y0 = y;
+        var x0 = x;
+        y = pivotCoordinate[1]+(x-pivotCoordinate[0]);
+        x = pivotCoordinate[0] - (y0-pivotCoordinate[1]);
+
+        var y2 = -pivotCoordinate[0]-pivotCoordinate[1]+x0;
+        var x2 = -pivotCoordinate[1]+pivotCoordinate[0]+y0;
+
+        if(coordinate[0]===pivotCoordinate[0] && coordinate[1]===pivotCoordinate[1]){
+            tempDropPivot = [x,y];
+        }
+        
+        var ifTrue = includesList(coordinates, [x, y]);
+        var ifTrueBackwards = includesList(coordinates, [x2, y2]);
+
+        if(x > 9 || y > 19 || x < 0 || y < 0){
+            tempDropBlock = [];
+            return 0;
+        }
+        if(tetrisWell[x][y]!==0 && !ifTrue){
+            tempDropBlock = [];
+            return 0;
+        }
+
+        if(ifTrueBackwards){
+            tempDropBlock.push([x,y]);
+            num = tetrisWell[x0][y0];
+            tempTetrisWell[x][y] = num;
+        }
+        else{
+            tempDropBlock.push([x,y]);
+            num = tetrisWell[x0][y0];
+            tempTetrisWell[x0][y0] = 0;
+            tempTetrisWell[x][y] = num;
+
+        }
+        
+        
+    }
+    
+    tetrisWell = JSON.parse(JSON.stringify(tempTetrisWell));
+    dropBlock = JSON.parse(JSON.stringify(tempDropBlock));
+    dropPivot = JSON.parse(JSON.stringify(tempDropPivot));
+
 }
 
 function render(){
@@ -406,8 +467,41 @@ function render(){
             }
         }
     }
+    return 0;
 }
 
+function clearRow(num){
+    for(xo=0; xo<10;xo++){
+        for(yo=1; yo<=num; yo++){
+            tetrisWell[xo][yo] = tetrisWell[xo][yo-1];
+        }
+        tetrisWell[xo][0]=0;
+    }
+    return 0;
+}
+
+function everyInterval(){
+    render();
+    if(dropFinished===false){
+        clearSuccess();
+        render();
+    }
+    return 0;
+}
+
+function clearSuccess(){
+    for(y=0;y<20; y++){
+        makeSure = true;
+        for(x=0; x<10; x++){
+            if(tetrisWell[x][y]===0){
+                makeSure = false;
+            }
+        }
+        if(makeSure){
+            clearRow(y);
+        }
+    }
+}
 function init(){ 
     canvas2d.clearRect(0, 0, width, height);
     canvas2d.fillStyle = backgroundColor;
@@ -430,17 +524,18 @@ async function main(){
     var a;
     var n = 0;
     while(true){
-        funcNow = draws[Math.floor(Math.random()*draws.length)]
-        funcNow();
-        render();
+        // funcNow = draws[Math.floor(Math.random()*draws.length)]
+        // funcNow();
+        drawTetronimoL();
         var timer = 0;
         while(true){
+            window.setInterval(everyInterval(), 100);
             render();
             dropTetronimo(dropBlock);
             if(dropFinished){
-                break
+                break;
             }
-            await sleep(500);
+            await sleep(time);
         }
         n++;
         await sleep(10);
@@ -450,21 +545,37 @@ async function main(){
 }
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
-document.setInterval(render(), 100);
+document.addEventListener("keyup", keyboardEnded, false);
 function dealWithKeyboard(e){
-
     switch(e.keyCode){
         case 37:
             moveTetronimo(dropBlock,false);
             break;
+
+        case 38:
+            rotateTetronimoBox(dropBlock, dropPivot);
+            break;
+
         case 39:
             moveTetronimo(dropBlock,true)
             break;
-            
 
+        case 40:
+        if(!change){
+            time/=5;
+        }
+        change = true
     }
 }
-
-async function domloaded(){
+function keyboardEnded(e){
+    switch(e.keyCode){
+        case 40:
+            if(change){
+                time*=5;
+            }
+            change = false;
+    }
+}
+function domloaded(){
     main();
 }
