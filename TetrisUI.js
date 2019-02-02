@@ -20,6 +20,7 @@ var dropBlock = [];
 var time = 500;
 var change = false;
 var ifSquare = false;
+var gameOn = true;
 for (i = 0; i < 10; i++) {
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
@@ -158,6 +159,10 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 }
 
 function drawTetronimoI(startX = 3, startY=0){
+    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+3][startY]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY] = 1;
     tetrisWell[startX+1][startY] = 1;
     tetrisWell[startX+2][startY] = 1;
@@ -169,10 +174,15 @@ function drawTetronimoI(startX = 3, startY=0){
     ifSquare = false;
     ifLine = true;
     lineRot = 0;
+    
     return 0;
 }
 
 function drawTetronimoJ(startX = 3, startY=0){
+    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY] = 2;
     tetrisWell[startX][startY+1] = 2;
     tetrisWell[startX+1][startY+1] = 2;
@@ -182,10 +192,15 @@ function drawTetronimoJ(startX = 3, startY=0){
     dropPivot = [startX+1, startY+1]
     ifSquare = false;
     ifLine = false;
+    
     return 0;
 }
 
 function drawTetronimoL(startX = 3, startY=0){
+    if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY+1] = 3;
     tetrisWell[startX+1][startY+1] = 3;
     tetrisWell[startX+2][startY+1] = 3;
@@ -195,10 +210,15 @@ function drawTetronimoL(startX = 3, startY=0){
     dropPivot = [startX+1, startY+1];
     ifSquare = false;
     ifLine = false;
+    
     return 0;
 }
 
 function drawTetronimoO(startX = 4, startY=0){
+    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY] = 4;
     tetrisWell[startX+1][startY] = 4;
     tetrisWell[startX][startY+1] = 4;
@@ -207,10 +227,15 @@ function drawTetronimoO(startX = 4, startY=0){
     dropBlock = [[startX,startY], [startX+1,startY],[startX,startY+1], [startX+1,startY+1]];
     ifSquare = true;
     ifLine = false;
+    
     return 0;
 }
 
 function drawTetronimoS(startX = 3, startY=0){
+    if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX+1][startY] = 5;
     tetrisWell[startX][startY+1] = 5;
     tetrisWell[startX+1][startY+1] = 5;
@@ -220,10 +245,15 @@ function drawTetronimoS(startX = 3, startY=0){
     dropPivot = [startX+1,startY];
     ifSquare = false;
     ifLine = false;
+    
     return 0;
 }
 
 function drawTetronimoT(startX = 3, startY = 0){
+    if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY+1]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY+1] = 6;
     tetrisWell[startX+1][startY+1] = 6;
     tetrisWell[startX+1][startY] = 6;
@@ -237,6 +267,10 @@ function drawTetronimoT(startX = 3, startY = 0){
 }
 
 function drawTetronimoZ(startX = 3, startY = 0){
+    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
+        gameOn = false;
+        return 0;
+    }
     tetrisWell[startX][startY] = 7;
     tetrisWell[startX+1][startY] = 7;
     tetrisWell[startX+1][startY+1] = 7;
@@ -249,7 +283,7 @@ function drawTetronimoZ(startX = 3, startY = 0){
     return 0;
 }
 
-function dropTetronimo(coordinates){
+async function dropTetronimo(coordinates){
     dropFinished=false;
     tempTetrisWell = JSON.parse(JSON.stringify(tetrisWell));
     length = coordinates.length;
@@ -672,11 +706,17 @@ function init(){
 }
 
 async function main(){
+    gameOn = true;
+    WebFont.load({
+        google: {
+            families: ['Righteous']
+        }
+    });
     var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
-    init();
     var a;
     var n = 0;
-    while(true){
+    init();
+    while(gameOn){
         funcNow = draws[Math.floor(Math.random()*draws.length)]
         funcNow();
         var timer = 0;
@@ -695,6 +735,13 @@ async function main(){
         
         
     }
+    init();
+    var stringAddon = Math.round((width/11)).toString()
+    canvas2d.font = stringAddon + "px Righteous";
+
+    canvas2d.fillStyle = "#ffffff"
+    canvas2d.fillText("Game Over", Math.round(width/4+width/50), Math.round(height/2));
+
 }
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
@@ -702,9 +749,10 @@ document.addEventListener("keyup", keyboardEnded, false);
 function dealWithKeyboard(e){
     switch(e.keyCode){
         case 37:
-            moveTetronimo(dropBlock,false);
-            
-            render();
+            if(!dropFinished){
+                moveTetronimo(dropBlock,false)
+                render();
+            }
             break;
 
         case 38:
@@ -722,8 +770,10 @@ function dealWithKeyboard(e){
             break;
 
         case 39:
-            moveTetronimo(dropBlock,true)
-            render();
+            if(!dropFinished){
+                moveTetronimo(dropBlock,true)
+                render();
+            }
             break;
 
         case 40:
@@ -742,6 +792,6 @@ function keyboardEnded(e){
             change = false;
     }
 }
-function domloaded(){
+async function domloaded(){
     main();
 }
