@@ -21,6 +21,10 @@ var time = 500;
 var change = false;
 var ifSquare = false;
 var gameOn = true;
+var holdBlock = 0;
+var holdFinished = false;
+var canHold = true;
+var nextFunc;
 for (i = 0; i < 10; i++) {
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
@@ -28,6 +32,7 @@ var tempTetrisWell = tetrisWell;
 var tempDropBlock = dropBlock;
 var dropPivot = [];
 var lineRot = 0;
+var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -214,17 +219,17 @@ function drawTetronimoL(startX = 3, startY=0){
     return 0;
 }
 
-function drawTetronimoO(startX = 4, startY=0){
-    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0){
+function drawTetronimoO(startX = 3, startY=0){
+    if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
         gameOn = false;
         return 0;
     }
-    tetrisWell[startX][startY] = 4;
     tetrisWell[startX+1][startY] = 4;
-    tetrisWell[startX][startY+1] = 4;
+    tetrisWell[startX+2][startY] = 4;
     tetrisWell[startX+1][startY+1] = 4;
+    tetrisWell[startX+2][startY+1] = 4;
     dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX,startY+1], [startX+1,startY+1]];
+    dropBlock = [[startX+1,startY], [startX+2,startY],[startX+1,startY+1], [startX+2,startY+1]];
     ifSquare = true;
     ifLine = false;
     
@@ -712,20 +717,32 @@ async function main(){
             families: ['Righteous']
         }
     });
-    var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
     var a;
     var n = 0;
     init();
     while(gameOn){
-        funcNow = draws[Math.floor(Math.random()*draws.length)]
-        funcNow();
+        nextFunc = draws[Math.floor(Math.random()*draws.length)];
+        if(!holdFinished){
+            funcNow = nextFunc;
+            nextFunc = draws[Math.floor(Math.random()*draws.length)];
+            funcNow();
+        }
+
+        else{
+            holdFinished = false;
+        }
         var timer = 0;
         while(true){
             window.setInterval(everyInterval(), 100);
             render();
             
             if(dropFinished){
+                canHold = true;
                 break;
+            }
+
+            if(holdFinished){
+                break;  
             }
             await sleep(time);
             dropTetronimo(dropBlock);
@@ -748,6 +765,32 @@ document.addEventListener("keydown", dealWithKeyboard, false);
 document.addEventListener("keyup", keyboardEnded, false);
 function dealWithKeyboard(e){
     switch(e.keyCode){
+        case 16:
+            if(holdBlock === 0 && canHold){
+                for(eraseCoord=0;eraseCoord<4;eraseCoord++){
+                    tetrisWell[dropBlock[eraseCoord][0]][dropBlock[eraseCoord][1]] = 0;
+                }
+                holdBlock = funcNow;
+                holdFinished = true
+                canHold = false;
+                nextFunc(4,0);
+                render();
+            }
+            else if(canHold){
+                for(eraseCoord=0;eraseCoord<4;eraseCoord++){
+                    tetrisWell[dropBlock[eraseCoord][0]][dropBlock[eraseCoord][1]] = 0;
+                }
+                holdBlock(4,0);
+                canHold = false;
+                holdBlock = funcNow;
+                holdFinished = true
+                render();
+            
+            }
+
+            else{
+                return 0;
+            }
         case 37:
             if(!dropFinished){
                 moveTetronimo(dropBlock,false)
@@ -756,12 +799,12 @@ function dealWithKeyboard(e){
             break;
 
         case 38:
-            if(!ifSquare && !ifLine){
+            if(!ifSquare && !ifLine && !dropFinished){
                 rotateTetronimoBox(dropBlock, dropPivot);
                 render();
             }
             
-            if(ifLine){
+            if(ifLine && !dropFinished){
                 rotateTetronimoLine(dropBlock);
                 render();
                 break
@@ -777,10 +820,12 @@ function dealWithKeyboard(e){
             break;
 
         case 40:
-        if(!change){
-            time/=5;
-        }
-        change = true
+            if(!change){
+                time/=5;
+            }
+            change = true
+
+        
     }
 }
 function keyboardEnded(e){
