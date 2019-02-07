@@ -25,6 +25,10 @@ var holdBlock = 0;
 var holdFinished = false;
 var canHold = true;
 var nextFunc;
+var tetrisLevel = 1;
+var linesCleared = 0;
+var numLines = 10;
+var score = 0;
 for (i = 0; i < 10; i++) {
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
@@ -118,6 +122,10 @@ function coordinateToLocation(coordinateX,coordinateY){
     
 }
 
+function backgroundColorFunc(x,y){
+    return backgroundColor;
+}
+
 function fillCoordinate(x,y,func){
     var h = coordinateToLocation(x,y);
     var x = h[0];
@@ -163,128 +171,184 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 
 }
 
-function drawTetronimoI(startX = 3, startY=0){
-    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+3][startY]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoI(startX=3, startY=0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+3][startY]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX][startY] = 1;
+        tetrisWell[startX+1][startY] = 1;
+        tetrisWell[startX+2][startY] = 1;
+        tetrisWell[startX+3][startY] = 1;
+
+        dropFinished=false;
+        dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+3,startY]];
+        dropCoordinate = [startX+1,startY];
+        dropPivot = [startX+1, startY];
+        ifSquare = false;
+        ifLine = true;
+        lineRot = 0;
     }
-    tetrisWell[startX][startY] = 1;
-    tetrisWell[startX+1][startY] = 1;
-    tetrisWell[startX+2][startY] = 1;
-    tetrisWell[startX+3][startY] = 1;
-    dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX+2,startY], [startX+3,startY]];
-    dropCoordinate = [startX+1,startY];
-    dropPivot = [startX+1, startY];
-    ifSquare = false;
-    ifLine = true;
-    lineRot = 0;
+    else{
+        fillCoordinate(startX-.5, startY+.5, tetronimoIGradient);
+        fillCoordinate(startX+.5, startY+.5, tetronimoIGradient);
+        fillCoordinate(startX+1.5, startY+.5, tetronimoIGradient);
+        fillCoordinate(startX+2.5, startY+.5, tetronimoIGradient);
+    }
     
     return 0;
 }
 
-function drawTetronimoJ(startX = 3, startY=0){
-    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoJ(startX = 3, startY=0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
+            gameOn = false;
+            return 0;
+        }  
+        tetrisWell[startX][startY] = 2;
+        tetrisWell[startX][startY+1] = 2;
+        tetrisWell[startX+1][startY+1] = 2;
+        tetrisWell[startX+2][startY+1] = 2;
+        dropFinished=false;
+        dropBlock = [[startX,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY+1]];
+        dropPivot = [startX+1, startY+1]
+        ifSquare = false;
+        ifLine = false;
     }
-    tetrisWell[startX][startY] = 2;
-    tetrisWell[startX][startY+1] = 2;
-    tetrisWell[startX+1][startY+1] = 2;
-    tetrisWell[startX+2][startY+1] = 2;
-    dropFinished=false;
-    dropBlock = [[startX,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY+1]];
-    dropPivot = [startX+1, startY+1]
-    ifSquare = false;
-    ifLine = false;
+    else{
+        fillCoordinate(startX, startY, tetronimoJGradient);
+        fillCoordinate(startX, startY+1, tetronimoJGradient);
+        fillCoordinate(startX+1, startY+1, tetronimoJGradient);
+        fillCoordinate(startX+2, startY+1, tetronimoJGradient);
+    }
+    return 0;
+}
+
+function drawTetronimoL(startX = 3, startY=0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX][startY+1] = 3;
+        tetrisWell[startX+1][startY+1] = 3;
+        tetrisWell[startX+2][startY+1] = 3;
+        tetrisWell[startX+2][startY] = 3;
+        dropFinished=false;
+        dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+2,startY+1], [startX+2,startY]];
+        dropPivot = [startX+1, startY+1];
+        ifSquare = false;
+        ifLine = false;
+    }
+    else{
+        fillCoordinate(startX, startY+1, tetronimoLGradient);
+        fillCoordinate(startX+1, startY+1, tetronimoLGradient);
+        fillCoordinate(startX+2, startY+1, tetronimoLGradient);
+        fillCoordinate(startX+2, startY, tetronimoLGradient);
+    }
     
     return 0;
 }
 
-function drawTetronimoL(startX = 3, startY=0){
-    if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoO(startX = 3, startY=0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX+1][startY] = 4;
+        tetrisWell[startX+2][startY] = 4;
+        tetrisWell[startX+1][startY+1] = 4;
+        tetrisWell[startX+2][startY+1] = 4;
+        
+        dropFinished=false;
+        dropBlock = [[startX+1,startY], [startX+2,startY],[startX+1,startY+1], [startX+2,startY+1]];
+        ifSquare = true;
+        ifLine = false;
     }
-    tetrisWell[startX][startY+1] = 3;
-    tetrisWell[startX+1][startY+1] = 3;
-    tetrisWell[startX+2][startY+1] = 3;
-    tetrisWell[startX+2][startY] = 3;
-    dropFinished=false;
-    dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+2,startY+1], [startX+2,startY]];
-    dropPivot = [startX+1, startY+1];
-    ifSquare = false;
-    ifLine = false;
+    else{
+        fillCoordinate(startX+.5, startY, tetronimoOGradient);
+        fillCoordinate(startX+1.5, startY, tetronimoOGradient);
+        fillCoordinate(startX+.5, startY+1, tetronimoOGradient);
+        fillCoordinate(startX+1.5, startY+1, tetronimoOGradient);
+    }
     
     return 0;
 }
 
-function drawTetronimoO(startX = 3, startY=0){
-    if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoS(startX = 3, startY=0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX+1][startY] = 5;
+        tetrisWell[startX][startY+1] = 5;
+        tetrisWell[startX+1][startY+1] = 5;
+        tetrisWell[startX+2][startY] = 5;
+        dropFinished=false;
+        dropBlock = [[startX+1,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY]];
+        dropPivot = [startX+1,startY];
+        ifSquare = false;
+        ifLine = false;
     }
-    tetrisWell[startX+1][startY] = 4;
-    tetrisWell[startX+2][startY] = 4;
-    tetrisWell[startX+1][startY+1] = 4;
-    tetrisWell[startX+2][startY+1] = 4;
-    dropFinished=false;
-    dropBlock = [[startX+1,startY], [startX+2,startY],[startX+1,startY+1], [startX+2,startY+1]];
-    ifSquare = true;
-    ifLine = false;
-    
+    else{
+        fillCoordinate(startX+1, startY, tetronimoSGradient);
+        fillCoordinate(startX, startY+1, tetronimoSGradient);
+        fillCoordinate(startX+1, startY+1, tetronimoSGradient);
+        fillCoordinate(startX+2, startY, tetronimoSGradient);
+    }
     return 0;
 }
 
-function drawTetronimoS(startX = 3, startY=0){
-    if(tetrisWell[startX+1][startY]!==0 || tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoT(startX = 3, startY = 0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY+1]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX][startY+1] = 6;
+        tetrisWell[startX+1][startY+1] = 6;
+        tetrisWell[startX+1][startY] = 6;
+        tetrisWell[startX+2][startY+1] = 6;
+        dropFinished=false;
+        dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+1,startY], [startX+2,startY+1]];
+        dropPivot = [startX+1,startY+1];
+        ifSquare = false;
+        ifLine = false;
     }
-    tetrisWell[startX+1][startY] = 5;
-    tetrisWell[startX][startY+1] = 5;
-    tetrisWell[startX+1][startY+1] = 5;
-    tetrisWell[startX+2][startY] = 5;
-    dropFinished=false;
-    dropBlock = [[startX+1,startY], [startX,startY+1],[startX+1,startY+1], [startX+2,startY]];
-    dropPivot = [startX+1,startY];
-    ifSquare = false;
-    ifLine = false;
-    
+    else{
+        fillCoordinate(startX, startY+1, tetronimoTGradient);
+        fillCoordinate(startX+1, startY+1, tetronimoTGradient);
+        fillCoordinate(startX+1, startY, tetronimoTGradient);
+        fillCoordinate(startX+2, startY+1, tetronimoTGradient);
+    }
     return 0;
 }
 
-function drawTetronimoT(startX = 3, startY = 0){
-    if(tetrisWell[startX][startY+1]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+2][startY+1]!==0){
-        gameOn = false;
-        return 0;
+function drawTetronimoZ(startX = 3, startY = 0, newBlock=true){
+    if(newBlock){
+        if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
+            gameOn = false;
+            return 0;
+        }
+        tetrisWell[startX][startY] = 7;
+        tetrisWell[startX+1][startY] = 7;
+        tetrisWell[startX+1][startY+1] = 7;
+        tetrisWell[startX+2][startY+1] = 7;
+        dropFinished=false;
+        dropBlock = [[startX,startY], [startX+1,startY],[startX+1,startY+1], [startX+2,startY+1]];
+        dropPivot = [startX+1,startY];
+        ifSquare = false;
+        ifLine = false;
     }
-    tetrisWell[startX][startY+1] = 6;
-    tetrisWell[startX+1][startY+1] = 6;
-    tetrisWell[startX+1][startY] = 6;
-    tetrisWell[startX+2][startY+1] = 6;
-    dropFinished=false;
-    dropBlock = [[startX,startY+1], [startX+1,startY+1],[startX+1,startY], [startX+2,startY+1]];
-    dropPivot = [startX+1,startY+1];
-    ifSquare = false;
-    ifLine = false;
-    return 0;
-}
-
-function drawTetronimoZ(startX = 3, startY = 0){
-    if(tetrisWell[startX][startY]!==0 || tetrisWell[startX+1][startY]!==0 || tetrisWell[startX+1][startY+1]!==0 || tetrisWell[startX+2][startY+1]!==0){
-        gameOn = false;
-        return 0;
+    else{
+        fillCoordinate(startX, startY, tetronimoZGradient);
+        fillCoordinate(startX+1, startY, tetronimoZGradient);
+        fillCoordinate(startX+1, startY+1, tetronimoZGradient);
+        fillCoordinate(startX+2, startY+1, tetronimoZGradient);
     }
-    tetrisWell[startX][startY] = 7;
-    tetrisWell[startX+1][startY] = 7;
-    tetrisWell[startX+1][startY+1] = 7;
-    tetrisWell[startX+2][startY+1] = 7;
-    dropFinished=false;
-    dropBlock = [[startX,startY], [startX+1,startY],[startX+1,startY+1], [startX+2,startY+1]];
-    dropPivot = [startX+1,startY];
-    ifSquare = false;
-    ifLine = false;
     return 0;
 }
 
@@ -657,6 +721,7 @@ function render(){
             }
         }
     }
+    writeScore(score);
     return 0;
 }
 
@@ -682,6 +747,8 @@ function everyInterval(){
 }
 
 function clearSuccess(){
+    var scoreLines = 0;
+    var listScores = scoreReinitialize(tetrisLevel);
     for(y=0;y<20; y++){
         makeSure = true;
         for(x=0; x<10; x++){
@@ -690,10 +757,49 @@ function clearSuccess(){
             }
         }
         if(makeSure){
+            linesCleared++;
+            if(linesCleared===numLines){
+                linesCleared = 0;
+                tetrisLevel++;
+            }
+            scoreLines++;
             clearRow(y)
         }
     }
+    if(scoreLines!==0){
+        score+=listScores[scoreLines-1];
+    }
 }
+
+function scoreReinitialize(level){
+    var levelScoreVar = Math.min(Math.floor(level/2)+1, 5);
+    return [100 * levelScoreVar, 400 * levelScoreVar, 900 * levelScoreVar, 2000 * levelScoreVar, levelScoreVar];
+}
+
+function showNextFunc(nextFunc){
+    var start = coordinateToLocation(10.4, 7)
+    var startX = start[0]
+    var startY = start[1]
+    var end = coordinateToLocation(15, 11)
+    var endX = end[0]
+    var endY = end[1]
+    canvas2d.fillStyle = backgroundColor;
+    canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
+    nextFunc(11,8,false);
+}
+
+function writeScore(score){
+    var stringAddon = Math.round((width/35)).toString()
+    canvas2d.fillStyle = backgroundColor;
+    canvas2d.fillRect(0, 40*height/50, width/4-width/100, 10*height/50)
+    canvas2d.font = stringAddon + "px Righteous";
+    canvas2d.fillStyle = "#ffffff";
+    canvas2d.save()
+    canvas2d.restore()
+    canvas2d.fillText("Score: " + score, Math.round(width/30), Math.round(48*height/50));
+    canvas2d.fillText("Level: " + tetrisLevel, Math.round(width/30), Math.round(46*height/50));
+}
+
 function init(){ 
     canvas2d.clearRect(0, 0, width, height);
     canvas2d.fillStyle = backgroundColor;
@@ -706,10 +812,33 @@ function init(){
     canvas2d.moveTo(Math.round(3*width/4), 0);
     canvas2d.lineTo(Math.round(3*width/4), height);
     canvas2d.stroke();
-    canvas2d.closePath();
     return 0;
 }
 
+function writeHold(){
+    var stringAddon = Math.round((width/20)).toString()
+    canvas2d.save();
+    canvas2d.fillStyle = backgroundColor;
+    canvas2d.fillRect(Math.round(width/14), Math.round(10 * height/50), width/100, height/500);
+    canvas2d.font = stringAddon + "px Righteous";
+    canvas2d.fillStyle = backgroundColor;
+    canvas2d.fillRect(Math.round(width/14), Math.round(10 * height/50), width/8, height/5);
+    canvas2d.fillStyle = "#ffffff";
+    canvas2d.fillText("Hold", Math.round(width/14), Math.round(18*height/50));
+    canvas2d.restore();
+}
+
+function writeNext(){
+    var stringAddon = Math.round((width/20)).toString()
+    canvas2d.save();
+    canvas2d.font = stringAddon + "px Righteous";
+    canvas2d.fillStyle = backgroundColor;
+    canvas2d.fillRect(Math.round(11.5 * width/14), Math.round(10 * height/50), width, height/5);
+    canvas2d.fillStyle = "#ffffff";
+    canvas2d.fillText("Next", Math.round(11.5 * width/14), Math.round(18*height/50));
+    canvas2d.restore();
+    return 0;
+}
 async function main(){
     gameOn = true;
     WebFont.load({
@@ -720,32 +849,42 @@ async function main(){
     var a;
     var n = 0;
     init();
+    
+    nextFunc = draws[Math.floor(Math.random()*draws.length)];
     while(gameOn){
-        nextFunc = draws[Math.floor(Math.random()*draws.length)];
         if(!holdFinished){
             funcNow = nextFunc;
             nextFunc = draws[Math.floor(Math.random()*draws.length)];
             funcNow();
         }
-
         else{
             holdFinished = false;
         }
+        showNextFunc(nextFunc);
+
         var timer = 0;
+        
         while(true){
             window.setInterval(everyInterval(), 100);
             render();
+            writeNext();
+            writeHold();
             
             if(dropFinished){
                 canHold = true;
+                time = time * .999
                 break;
             }
 
             if(holdFinished){
                 break;  
             }
-            await sleep(time);
+            await sleep(time)
             dropTetronimo(dropBlock);
+            if(change){
+                listScore = scoreReinitialize(tetrisLevel)
+                score += listScore[listScore.length-1];
+            }
         }
         n++;
         await sleep(10);
@@ -753,10 +892,10 @@ async function main(){
         
     }
     init();
-    var stringAddon = Math.round((width/11)).toString()
+    var stringAddon = Math.round((width/11.3)).toString()
     canvas2d.font = stringAddon + "px Righteous";
-
-    canvas2d.fillStyle = "#ffffff"
+    canvas2d.fillStyle = "#ffffff";
+    canvas2d.fillText("Game Over", Math.round(width/4+width/50), Math.round(height/2));
     canvas2d.fillText("Game Over", Math.round(width/4+width/50), Math.round(height/2));
 
 }
@@ -774,16 +913,36 @@ function dealWithKeyboard(e){
                 holdFinished = true
                 canHold = false;
                 nextFunc(4,0);
+                var start = coordinateToLocation(-5, 7)
+                var startX = start[0]
+                var startY = start[1]
+                var end = coordinateToLocation(-.4, 11)
+                var endX = end[0]
+                var endY = end[1]
+                canvas2d.fillStyle = backgroundColor;
+                canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
+                holdBlock(-4,8,false);
+                writeHold();
                 render();
             }
             else if(canHold){
                 for(eraseCoord=0;eraseCoord<4;eraseCoord++){
                     tetrisWell[dropBlock[eraseCoord][0]][dropBlock[eraseCoord][1]] = 0;
                 }
+                var start = coordinateToLocation(-5, 7)
+                var startX = start[0]
+                var startY = start[1]
+                var end = coordinateToLocation(-.4, 11)
+                var endX = end[0]
+                var endY = end[1]
+                canvas2d.fillStyle = backgroundColor;
+                canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
                 holdBlock(4,0);
                 canHold = false;
                 holdBlock = funcNow;
                 holdFinished = true
+                holdBlock(-4,8,false);
+                writeHold();
                 render();
             
             }
