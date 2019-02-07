@@ -36,6 +36,9 @@ var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTet
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+var socket;
+socket = io.connect('http://localhost:3000');
+socket.on('key', socketKey);
 
 function listsEqual(l1, l2){
     var ifEqual=true;
@@ -762,49 +765,73 @@ async function main(){
 }
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
-document.addEventListener("keyup", keyboardEnded, false);
+// document.addEventListener("keyup", keyboardEnded, false);
 function dealWithKeyboard(e){
-    switch(e.keyCode){
+    var data = {
+        pressed: e.keyCode
+    }
+    socket.emit('key', data);
+    console.log(data);
+}
+// function keyboardEnded(e){
+//     switch(e.keyCode){
+//         case 40:
+//             if(change){
+//                 time*=5;
+//             }
+//             change = false;
+//     }
+// }
+
+
+
+async function domloaded(){
+    main();
+}
+
+
+function socketKey(data){
+    switch (data.pressed) {
         case 16:
-            if(holdBlock === 0 && canHold){
-                for(eraseCoord=0;eraseCoord<4;eraseCoord++){
+            if (holdBlock === 0 && canHold) {
+                for (eraseCoord = 0; eraseCoord < 4; eraseCoord++) {
                     tetrisWell[dropBlock[eraseCoord][0]][dropBlock[eraseCoord][1]] = 0;
                 }
                 holdBlock = funcNow;
                 holdFinished = true
                 canHold = false;
-                nextFunc(4,0);
+                nextFunc(4, 0);
                 render();
             }
-            else if(canHold){
-                for(eraseCoord=0;eraseCoord<4;eraseCoord++){
+            else if (canHold) {
+                for (eraseCoord = 0; eraseCoord < 4; eraseCoord++) {
                     tetrisWell[dropBlock[eraseCoord][0]][dropBlock[eraseCoord][1]] = 0;
                 }
-                holdBlock(4,0);
+                holdBlock(4, 0);
                 canHold = false;
                 holdBlock = funcNow;
                 holdFinished = true
                 render();
-            
+
             }
 
-            else{
+            else {
                 return 0;
             }
         case 37:
-            if(!dropFinished){
-                moveTetronimo(dropBlock,false)
+            if (!dropFinished) {
+                moveTetronimo(dropBlock, false)
                 render();
             }
             break;
 
         case 38:
-            if(!ifSquare && !ifLine && !dropFinished){
+            if (!ifSquare && !ifLine && !dropFinished) {
                 rotateTetronimoBox(dropBlock, dropPivot);
                 render();
             }
-            
-            if(ifLine && !dropFinished){
+
+            if (ifLine && !dropFinished) {
                 rotateTetronimoLine(dropBlock);
                 render();
                 break
@@ -813,30 +840,16 @@ function dealWithKeyboard(e){
             break;
 
         case 39:
-            if(!dropFinished){
-                moveTetronimo(dropBlock,true)
+            if (!dropFinished) {
+                moveTetronimo(dropBlock, true)
                 render();
             }
             break;
 
-        case 40:
-            if(!change){
-                time/=5;
-            }
-            change = true
-
-        
+        // case 40:
+        //     if (!change) {
+        //         time /= 5;
+        //     }
+        //     change = true
     }
-}
-function keyboardEnded(e){
-    switch(e.keyCode){
-        case 40:
-            if(change){
-                time*=5;
-            }
-            change = false;
-    }
-}
-async function domloaded(){
-    main();
 }
