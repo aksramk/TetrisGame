@@ -12,7 +12,7 @@ var canvas = document.getElementById("myCanvas");
 var canvas2d = canvas.getContext("2d");
 var width = canvas.width;
 var height = canvas.height;
-var backgroundColor = '#213a3d';
+var backgroundColor = '#1f305f';
 var tetrisPixelSize = height / 20;
 var tetrisWell = []
 var dropFinished = false;
@@ -29,7 +29,7 @@ var tetrisLevel = 1;
 var linesCleared = 0;
 var numLines = 10;
 var score = 0;
-var speed = 15;
+var speed = 25;
 var countdownDone = true;
 var dropNum = 0;
 var spaced = false;
@@ -43,6 +43,7 @@ var dropPivot = [];
 var lineRot = 0;
 var paused = false;
 var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
+canvas2d.textAlign = "center";
 
 function wait(ms) {
     var start = Date.now(),
@@ -78,54 +79,54 @@ function includesList(bigList, subList){
 
 function tetronimoIGradient(x, y){
     var tetronimoIColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoIColor.addColorStop(0, "#b5f3ff");
-    tetronimoIColor.addColorStop(1, "#00d4ff");
+    tetronimoIColor.addColorStop(0, "#4fa7f8");
+    tetronimoIColor.addColorStop(1, "#57adf8");
     return tetronimoIColor;
 }
 
 function tetronimoJGradient(x, y){
     var tetronimoJColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoJColor.addColorStop(0, "#4a52f7");
-    tetronimoJColor.addColorStop(1, "#252ff9");
+    tetronimoJColor.addColorStop(0, "#3c6ccd");
+    tetronimoJColor.addColorStop(1, "#3157ab");
     return tetronimoJColor;
 }
 
 function tetronimoLGradient(x, y){
     var tetronimoLColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoLColor.addColorStop(0, "#e2ab46");
-    tetronimoLColor.addColorStop(1, "#ba7800");
+    tetronimoLColor.addColorStop(0, "#e56a2e");
+    tetronimoLColor.addColorStop(1, "#e56a2e");
     return tetronimoLColor;
 
 }
 
 function tetronimoOGradient(x, y){
     var tetronimoOColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoOColor.addColorStop(0, "#d8d800");
-    tetronimoOColor.addColorStop(1, "#999900");
+    tetronimoOColor.addColorStop(0, "#f2b03e");
+    tetronimoOColor.addColorStop(1, "#f2b03e");
     return tetronimoOColor;
 
 }
 
 function tetronimoSGradient(x, y){
     var tetronimoSColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoSColor.addColorStop(0, "#45bc58");
-    tetronimoSColor.addColorStop(1, "#008416");
+    tetronimoSColor.addColorStop(0, "#53ad36");
+    tetronimoSColor.addColorStop(1, "#53ad36");
     return tetronimoSColor;
 
 }
 
 function tetronimoTGradient(x, y){
     var tetronimoTColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoTColor.addColorStop(0, "#ff7ced");
-    tetronimoTColor.addColorStop(1, "#f731dc");
+    tetronimoTColor.addColorStop(0, "#8770d3");
+    tetronimoTColor.addColorStop(1, "#8770d3");
     return tetronimoTColor;
 
 }
 
 function tetronimoZGradient(x, y){
     var tetronimoZColor = canvas2d.createLinearGradient(x, y, x + tetrisPixelSize, y+ tetrisPixelSize);
-    tetronimoZColor.addColorStop(0, "#ff7c84");
-    tetronimoZColor.addColorStop(1, "#ff1625"); 
+    tetronimoZColor.addColorStop(0, "#ce4141");
+    tetronimoZColor.addColorStop(1, "#ce3c31"); 
     return tetronimoZColor;
 
 }
@@ -147,7 +148,7 @@ function fillCoordinate(x,y,func){
     var y = h[1];
     canvas2d.fillStyle = func(x, y);
     canvas2d.lineWidth = width/800;
-    roundRect(canvas2d, x, y, tetrisPixelSize, tetrisPixelSize, Math.round(tetrisPixelSize/30), true);
+    roundRect(canvas2d, x, y, tetrisPixelSize-width/1000, tetrisPixelSize-height/1000, Math.round(tetrisPixelSize/15), true);
     return x,y;
 }
 
@@ -166,6 +167,7 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       radius[side] = radius[side] || defaultRadius[side];
     }
   }
+  ctx.lineWidth = width/15;
   ctx.beginPath();
   ctx.moveTo(x + radius.tl, y);
   ctx.lineTo(x + width - radius.tr, y);
@@ -795,7 +797,7 @@ function render(){
             }
         }
     }
-    writeScore(score);
+    // writeScore(score);
     return 0;
 }
 
@@ -815,6 +817,7 @@ function clearRow(num){
 function clearSuccess(){
     var scoreLines = 0;
     var listScores = scoreReinitialize(tetrisLevel);
+
     for(y=0;y<20; y++){
         makeSure = true;
         for(x=0; x<10; x++){
@@ -823,6 +826,7 @@ function clearSuccess(){
             }
         }
         if(makeSure){
+            time = time * .98
             linesCleared++;
             if(linesCleared===numLines){
                 linesCleared = 0;
@@ -832,8 +836,21 @@ function clearSuccess(){
             clearRow(y)
         }
     }
-    if(scoreLines!==0){
-        score+=listScores[scoreLines-1];
+
+    for(y=0;y<20; y++){
+        perfectClear = true;
+        for(x=0; x<10; x++){
+            if(tetrisWell[x][y]!==0){
+                perfectClear=false;
+            }
+        }
+    }
+    
+    if(scoreLines!==0 && perfectClear){
+        score+=10 *listScores[scoreLines-1];
+    }
+    else if(scoreLines!==0){
+        score += listScores[scoreLines-1];
     }
 }
 
@@ -862,15 +879,15 @@ async function writeScore(score){
     canvas2d.fillStyle = "#ffffff";
     canvas2d.save()
     canvas2d.restore()
-    canvas2d.fillText("Score: " + score, Math.round(width/30), Math.round(48*height/50));
-    canvas2d.fillText("Level: " + tetrisLevel, Math.round(width/30), Math.round(46*height/50));
+    canvas2d.fillText("Score: " + score, Math.round(width/8.2), Math.round(48*height/50));
+    canvas2d.fillText("Level: " + tetrisLevel, Math.round(width/8.2), Math.round(46*height/50));
     if(startGame===0){
         await sleep(10);
         canvas2d.fillStyle = backgroundColor;
         canvas2d.fillRect(0, 40*height/50, width/4-width/100, 10*height/50)
         canvas2d.fillStyle = "#ffffff";
-        canvas2d.fillText("Score: " + score, Math.round(width/30), Math.round(48*height/50));
-        canvas2d.fillText("Level: " + tetrisLevel, Math.round(width/30), Math.round(46*height/50));
+        canvas2d.fillText("Score: " + score, Math.round(width/8.2), Math.round(48*height/50));
+        canvas2d.fillText("Level: " + tetrisLevel, Math.round(width/8.2), Math.round(46*height/50));
     }
     
 }
@@ -897,9 +914,9 @@ function writeHold(){
     canvas2d.fillRect(Math.round(width/14), Math.round(10 * height/50), width/100, height/500);
     canvas2d.font = stringAddon + "px Righteous";
     canvas2d.fillStyle = backgroundColor;
-    canvas2d.fillRect(Math.round(width/14), Math.round(10 * height/50), width/8, height/5);
+    canvas2d.fillRect(Math.round(width/14), Math.round(10 * height/50), width/8, height/5-height/75);
     canvas2d.fillStyle = "#ffffff";
-    canvas2d.fillText("Hold", Math.round(width/14), Math.round(18*height/50));
+    canvas2d.fillText("Hold", Math.round(width/8.2), Math.round(18*height/50));
     canvas2d.restore();
 }
 
@@ -908,9 +925,9 @@ function writeNext(){
     canvas2d.save();
     canvas2d.font = stringAddon + "px Righteous";
     canvas2d.fillStyle = backgroundColor;
-    canvas2d.fillRect(Math.round(11.5 * width/14), Math.round(10 * height/50), width, height/5);
+    canvas2d.fillRect(Math.round(11.5 * width/14), Math.round(10 * height/50), width, height/5 - height/75);
     canvas2d.fillStyle = "#ffffff";
-    canvas2d.fillText("Next", Math.round(11.5 * width/14), Math.round(18*height/50));
+    canvas2d.fillText("Next", Math.round(3*width/4 + width/8), Math.round(18*height/50));
     canvas2d.restore();
     return 0;
 }
@@ -943,11 +960,13 @@ async function main(){
             funcNow = nextFunc;
             nextFunc = draws[Math.floor(Math.random()*draws.length)];
             funcNow();
+            canHold = true;
         }
         else{
             holdFinished = false;
+            
         }
-        canHold = true;
+        
         showNextFunc(nextFunc);
 
         while(true){
@@ -955,27 +974,30 @@ async function main(){
                 render();
                 writeNext();
                 writeHold();
-                await sleep(10);
+                await sleep(5);
                 writeNext();
                 writeHold();
                 
                 if(dropFinished){
                     dropNum++;
                     clearSuccess();
+                    writeScore(score);
                     if(dropNum%1!==0){
                         dropFinished = false;
                     }
                     else{
                         break;
                     }
-                    canHold = true;
-                    time = time * .998
                 }
 
                 if(holdFinished){
                     break;  
                 }
                 for(sleeping=0;sleeping<10;sleeping++){
+                    if(spaced===true){
+                        spaced = false;
+                        break;
+                    }
                     await sleep(time/10);
                 }
                 if(!paused){
@@ -988,12 +1010,12 @@ async function main(){
                 }
             }
             else{
-                await sleep(10)
+                await sleep(5)
             }
             startGame++;
         }
         n++;
-        await sleep(10);
+        await sleep(5);
         
         
     }
@@ -1002,35 +1024,39 @@ async function main(){
     canvas2d.font = stringAddon + "px Righteous";
     canvas2d.fillStyle = "#ffffff";
     
-    canvas2d.fillText("Game Over", Math.round(width/4+width/50), Math.round(height/2));
-    canvas2d.fillText("Game Over", Math.round(width/4+width/50), Math.round(height/2));
+    canvas2d.fillText("Game Over", Math.round(width/2), Math.round(height/2));
+    canvas2d.fillText("Game Over", Math.round(width/2), Math.round(height/2));
     var stringAddon = Math.round((width/30)).toString()
     canvas2d.font = stringAddon + "px Righteous";
-    canvas2d.fillText("Your Score Was: " + score, Math.round(width/4+ 5.5*width/50 - (score.toString()).length*width/100), Math.round(18*height/50));
+    canvas2d.fillText("Your Score Was: " + score, Math.round(width/2, Math.round(30*height/50)));
 
 }
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
 document.addEventListener("keyup", keyboardEnded, false);
 function dealWithKeyboard(e){
+    if(!gameOn){
+        return 0;
+    }
     if(e.keyCode===80){
         paused = !paused;
         if(paused){
             canvas2d.fillStyle=backgroundColor;
-            canvas2d.fillRect(width/4, 0, width/2, height);
+            canvas2d.fillRect(0, 0, width, height);
+            init();
             canvas2d.fillStyle="#ffffff";
             var stringAddon = Math.round((width/11.3)).toString()
             canvas2d.font = stringAddon + "px Righteous";
-            canvas2d.fillText("Paused", Math.round(width/4+4.5*width/50), Math.round(height/2));
+            canvas2d.fillText("Paused", Math.round(width/2), Math.round(height/2));
         }
 
         else{
+            writeNext();
+            writeHold();
+            writeScore(score);
             render();
 
         }
-        return 0;
-    }
-    if(!gameOn || (paused)){
         return 0;
     }
     switch(e.keyCode){
@@ -1043,6 +1069,8 @@ function dealWithKeyboard(e){
                 holdFinished = true
                 canHold = false;
                 nextFunc(3,0);
+                nextFunc = draws[Math.floor(Math.random()*draws.length)];
+                showNextFunc(nextFunc);
                 var start = coordinateToLocation(-5, 7)
                 var startX = start[0]
                 var startY = start[1]
