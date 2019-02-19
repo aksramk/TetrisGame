@@ -34,6 +34,7 @@ var countdownDone = true;
 var dropNum = 0;
 var spaced = false;
 var startGame;
+var timeHolder = time;
 for (i = 0; i < 10; i++) {
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
@@ -44,7 +45,8 @@ var lineRot = 0;
 var paused = false;
 var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
 canvas2d.textAlign = "center";
-
+var shadowColor = "#aaaaaa"
+var shadowBlock = []
 function wait(ms) {
     var start = Date.now(),
         now = start;
@@ -52,6 +54,8 @@ function wait(ms) {
       now = Date.now();
     }
 }
+
+
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -140,6 +144,10 @@ function coordinateToLocation(coordinateX,coordinateY){
 
 function backgroundColorFunc(x,y){
     return backgroundColor;
+}
+
+function shadowColorFunc(x,y){
+    return shadowColor;
 }
 
 function fillCoordinate(x,y,func){
@@ -797,6 +805,13 @@ function render(){
             }
         }
     }
+    if(shadowBlock.length===4){
+        for(shadow=0; shadow<4;shadow++){
+            if(tetrisWell[shadowBlock[shadow][0]][shadowBlock[shadow][1]]===0){
+                fillCoordinate(shadowBlock[shadow][0], shadowBlock[shadow][1], shadowColorFunc);
+            }
+        }
+    }
     // writeScore(score);
     return 0;
 }
@@ -826,7 +841,8 @@ function clearSuccess(){
             }
         }
         if(makeSure){
-            time = time * .98
+            time = time * .98;
+            timeHolder = timeHolder * .98;
             linesCleared++;
             if(linesCleared===numLines){
                 linesCleared = 0;
@@ -860,7 +876,7 @@ function scoreReinitialize(level){
 }
 
 function showNextFunc(nextFunc){
-    var start = coordinateToLocation(10.4, 7)
+    var start = coordinateToLocation(10.4, 7.5)
     var startX = start[0]
     var startY = start[1]
     var end = coordinateToLocation(15, 11)
@@ -946,6 +962,46 @@ function countdown(){
     return 0;
 }
 
+function drawShadow(dropBlock){
+    DropOver = false;
+    tempDropBlock = [];
+    shadowBlock = JSON.parse(JSON.stringify(dropBlock))
+    while(true){
+        tempDropBlock = []
+        for(shadowBlockNum=0; shadowBlockNum<4; shadowBlockNum++){
+            shadowX = shadowBlock[shadowBlockNum][0];
+            shadowY = shadowBlock[shadowBlockNum][1];
+
+            if(shadowY===19){
+                DropOver=true;
+                break;
+            }
+
+            if(includesList(dropBlock, [shadowX,shadowY+1])){
+                tempDropBlock.push([shadowX, shadowY+1])
+                continue;
+            }
+            else{
+                if(tetrisWell[shadowX][shadowY+1]!==0){
+                    DropOver = true;
+                    break;
+                }
+                else{
+                    tempDropBlock.push([shadowX, shadowY+1])
+                }
+            }
+        }
+        if(DropOver){
+            for(drawShadowBlock=0; drawShadowBlock<4; drawShadowBlock++){
+                
+            }
+            break;
+        }
+        shadowBlock = JSON.parse(JSON.stringify(tempDropBlock))
+    }
+    return 0;
+}
+
 async function main(){
     startGame = 0;
     gameOn = true;
@@ -960,6 +1016,7 @@ async function main(){
             funcNow = nextFunc;
             nextFunc = draws[Math.floor(Math.random()*draws.length)];
             funcNow();
+            drawShadow(dropBlock);
             canHold = true;
         }
         else{
@@ -1004,6 +1061,7 @@ async function main(){
                     dropTetronimo(dropBlock);
                     render();
                 }
+                drawShadow(dropBlock);
                 if(change&&!dropFinished){
                     listScore = scoreReinitialize(tetrisLevel)
                     score += listScore[listScore.length-1];
@@ -1034,6 +1092,24 @@ async function main(){
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
 document.addEventListener("keyup", keyboardEnded, false);
+document.addEventListener("click", mouseClicked, false);
+
+function mouseClicked(){
+    while(!dropFinished){
+        dropTetronimo(dropBlock);
+        if(!dropFinished){
+            listScore = scoreReinitialize(tetrisLevel)
+            score += listScore[listScore.length-1];
+        }
+    }
+    dropNum = dropNum + dropNum%2
+    dropFinished = true;
+    drawShadow(dropBlock);
+    render();
+    spaced = true;
+    return 0;
+}
+
 function dealWithKeyboard(e){
     if(!gameOn){
         return 0;
@@ -1057,8 +1133,11 @@ function dealWithKeyboard(e){
             render();
 
         }
+        drawShadow(dropBlock);
         return 0;
     }
+
+
     switch(e.keyCode){
         case 16:
             if(holdBlock === 0 && canHold){
@@ -1081,6 +1160,7 @@ function dealWithKeyboard(e){
                 canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
                 holdBlock(-4,8,false);
                 writeHold();
+                drawShadow(dropBlock);
                 render();
             }
             else if(canHold){
@@ -1101,6 +1181,7 @@ function dealWithKeyboard(e){
                 holdFinished = true
                 holdBlock(-4,8,false);
                 writeHold();
+                drawShadow(dropBlock);
                 render();
             
             }
@@ -1113,6 +1194,7 @@ function dealWithKeyboard(e){
         case 37:
             if(!dropFinished){
                 moveTetronimo(dropBlock,false)
+                drawShadow(dropBlock);
                 render();
             }
             break;
@@ -1120,20 +1202,19 @@ function dealWithKeyboard(e){
         case 38:
             if(!ifSquare && !ifLine && !dropFinished){
                 rotateTetronimoBox(dropBlock, dropPivot);
-                render();
             }
             
             if(ifLine && !dropFinished){
                 rotateTetronimoLine(dropBlock);
-                render();
-                break
             }
+            drawShadow(dropBlock);
             render();
             break;
 
         case 39:
             if(!dropFinished){
                 moveTetronimo(dropBlock,true)
+                drawShadow(dropBlock);
                 render();
             }
             break;
@@ -1155,6 +1236,7 @@ function dealWithKeyboard(e){
             }
             dropNum = dropNum + dropNum%2
             dropFinished = true;
+            drawShadow(dropBlock);
             render();
             spaced = true;
             break;
@@ -1164,7 +1246,7 @@ function keyboardEnded(e){
     switch(e.keyCode){
         case 40:
             if(change){
-                time*=speed;
+                time = timeHolder;
             }
             change = false;
     }
