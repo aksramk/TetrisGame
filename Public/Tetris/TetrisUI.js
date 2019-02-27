@@ -1136,6 +1136,9 @@ function dealWithKeyboard(e){
         drawShadow(dropBlock);
         return 0;
     }
+    if(true){
+        document.write("YEE");
+    }
 
 
     switch(e.keyCode){
