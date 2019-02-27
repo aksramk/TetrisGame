@@ -1059,14 +1059,6 @@ function dealWithKeyboard(e){
         }
         return 0;
     }
-<<<<<<< HEAD
-    if(true){
-        document.write("YEE");
-    }
-
-
-=======
->>>>>>> parent of edc6467... Minor changes
     switch(e.keyCode){
         case 16:
             if(holdBlock === 0 && canHold){
