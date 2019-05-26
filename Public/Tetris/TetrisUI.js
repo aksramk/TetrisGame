@@ -826,7 +826,7 @@ function clearSuccess(){
             }
         }
         if(makeSure){
-            time = time * .98
+            time *= .98;
             linesCleared++;
             if(linesCleared===numLines){
                 linesCleared = 0;
