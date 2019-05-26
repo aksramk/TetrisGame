@@ -1,3 +1,13 @@
+/* eslint-disable space-before-function-paren */
+/* eslint-disable space-before-blocks */
+/* eslint-disable eol-last */
+/* eslint-disable semi */
+/* eslint-disable indent */
+/* eslint-disable no-undef */
+/* eslint-disable quotes */
+/* eslint-disable no-trailing-spaces */
+/* eslint-disable no-unused-vars */
+
 var canvas = document.getElementById("myCanvas");
 var canvas2d = canvas.getContext("2d");
 var width = canvas.width;
@@ -7,7 +17,7 @@ var tetrisPixelSize = height / 20;
 var tetrisWell = []
 var dropFinished = false;
 var dropBlock = [];
-var time = 900;
+var time = 1000;
 var change = false;
 var ifSquare = false;
 var gameOn = true;
@@ -19,12 +29,11 @@ var tetrisLevel = 1;
 var linesCleared = 0;
 var numLines = 10;
 var score = 0;
-var speed = 40;
+var speed = 25;
 var countdownDone = true;
 var dropNum = 0;
 var spaced = false;
 var startGame;
-var timeHolder = time;
 for (i = 0; i < 10; i++) {
     tetrisWell.push([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 }
@@ -35,8 +44,7 @@ var lineRot = 0;
 var paused = false;
 var draws = [drawTetronimoI,drawTetronimoJ,drawTetronimoL,drawTetronimoO,drawTetronimoS,drawTetronimoT,drawTetronimoZ];
 canvas2d.textAlign = "center";
-var shadowColor = "#4f4f4f"
-var shadowBlock = []
+
 function wait(ms) {
     var start = Date.now(),
         now = start;
@@ -44,8 +52,6 @@ function wait(ms) {
       now = Date.now();
     }
 }
-
-
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -134,10 +140,6 @@ function coordinateToLocation(coordinateX,coordinateY){
 
 function backgroundColorFunc(x,y){
     return backgroundColor;
-}
-
-function shadowColorFunc(x,y){
-    return shadowColor;
 }
 
 function fillCoordinate(x,y,func){
@@ -436,7 +438,7 @@ function moveTetronimo(coordinates, goingRight){
             ifLeft = includesList(coordinates, [x-1,y]);
         }
         
-        else {
+        if (!goingRight){
             ifImportant = includesList(coordinates, [x-1,y]);
             ifRight = includesList(coordinates, [x+1,y]);
         }
@@ -469,7 +471,7 @@ function moveTetronimo(coordinates, goingRight){
         }
         
         
-        else{
+        if(!goingRight){
             if(tetrisWell[x-1][y]!==0 && !ifImportant){
                 go = false;
                 return 0;
@@ -490,7 +492,7 @@ function moveTetronimo(coordinates, goingRight){
             }
         }
 
-        else{
+        if(!goingRight){
             tempTetrisWell[x-1][y]= num;
             tempDropBlock.push([x-1,y])
             if (ifRight){
@@ -512,7 +514,7 @@ function moveTetronimo(coordinates, goingRight){
     if(goingRight){
         dropPivot[0] = dropPivot[0]+1;
     }
-    else {
+    if(!goingRight){
         dropPivot[0] = dropPivot[0]-1;
     }
     return 0;
@@ -758,7 +760,6 @@ function rotateTetronimoLine(coordinates){
 }
 
 function render(){
-    var listOfFunctions = [tetronimoIGradient, tetronimoJGradient, tetronimoLGradient, tetronimoOGradient, tetronimoSGradient, tetronimoTGradient, tetronimoZGradient]
     for(x=0; x<10; x++){
         for(y=0; y<20; y++){
             if(tetrisWell[x][y] === 0){
@@ -766,15 +767,33 @@ function render(){
                 canvas2d.fillStyle = backgroundColor;
                 canvas2d.fillRect(starts[0], starts[1], tetrisPixelSize, tetrisPixelSize);
             }
-            else{
-                fillCoordinate(x, y, listOfFunctions[tetrisWell[x][y]-1])
+            
+            if(tetrisWell[x][y] === 1){
+                fillCoordinate(x,y,tetronimoIGradient);
             }
-        }
-    }
-    if(shadowBlock.length===4){
-        for(shadow=0; shadow<4;shadow++){
-            if(tetrisWell[shadowBlock[shadow][0]][shadowBlock[shadow][1]]===0){
-                fillCoordinate(shadowBlock[shadow][0], shadowBlock[shadow][1], shadowColorFunc);
+            
+            if(tetrisWell[x][y] === 2){
+                fillCoordinate(x,y,tetronimoJGradient);
+            }
+            
+            if(tetrisWell[x][y] === 3){
+                fillCoordinate(x,y,tetronimoLGradient);
+            }
+            
+            if(tetrisWell[x][y] === 4){
+                fillCoordinate(x,y,tetronimoOGradient);
+            }
+            
+            if(tetrisWell[x][y] === 5){
+                fillCoordinate(x,y,tetronimoSGradient);
+            }
+            
+            if(tetrisWell[x][y] === 6){
+                fillCoordinate(x,y,tetronimoTGradient);
+            }
+            
+            if(tetrisWell[x][y] === 7){
+                fillCoordinate(x,y,tetronimoZGradient);
             }
         }
     }
@@ -807,8 +826,7 @@ function clearSuccess(){
             }
         }
         if(makeSure){
-            time = time * .95;
-            timeHolder = timeHolder * .98;
+            time *= .98;
             linesCleared++;
             if(linesCleared===numLines){
                 linesCleared = 0;
@@ -838,11 +856,11 @@ function clearSuccess(){
 
 function scoreReinitialize(level){
     var levelScoreVar = Math.min(Math.floor(level/2)+1, 5);
-    return [100 * levelScoreVar, 300 * levelScoreVar, 500 * levelScoreVar, 800 * levelScoreVar, levelScoreVar];
+    return [100 * levelScoreVar, 400 * levelScoreVar, 900 * levelScoreVar, 2000 * levelScoreVar, levelScoreVar];
 }
 
 function showNextFunc(nextFunc){
-    var start = coordinateToLocation(10.4, 7.5)
+    var start = coordinateToLocation(10.4, 7)
     var startX = start[0]
     var startY = start[1]
     var end = coordinateToLocation(15, 11)
@@ -900,7 +918,6 @@ function writeHold(){
     canvas2d.fillStyle = "#ffffff";
     canvas2d.fillText("Hold", Math.round(width/8.2), Math.round(18*height/50));
     canvas2d.restore();
-    return 0;
 }
 
 function writeNext(){
@@ -929,46 +946,6 @@ function countdown(){
     return 0;
 }
 
-function drawShadow(dropBlock){
-    DropOver = false;
-    tempDropBlock = [];
-    shadowBlock = JSON.parse(JSON.stringify(dropBlock))
-    while(true){
-        tempDropBlock = []
-        for(shadowBlockNum=0; shadowBlockNum<4; shadowBlockNum++){
-            shadowX = shadowBlock[shadowBlockNum][0];
-            shadowY = shadowBlock[shadowBlockNum][1];
-
-            if(shadowY===19){
-                DropOver=true;
-                break;
-            }
-
-            if(includesList(dropBlock, [shadowX,shadowY+1])){
-                tempDropBlock.push([shadowX, shadowY+1])
-                continue;
-            }
-            else{
-                if(tetrisWell[shadowX][shadowY+1]!==0){
-                    DropOver = true;
-                    break;
-                }
-                else{
-                    tempDropBlock.push([shadowX, shadowY+1])
-                }
-            }
-        }
-        if(DropOver){
-            for(drawShadowBlock=0; drawShadowBlock<4; drawShadowBlock++){
-                
-            }
-            break;
-        }
-        shadowBlock = JSON.parse(JSON.stringify(tempDropBlock))
-    }
-    return 0;
-}
-
 async function main(){
     startGame = 0;
     gameOn = true;
@@ -983,7 +960,6 @@ async function main(){
             funcNow = nextFunc;
             nextFunc = draws[Math.floor(Math.random()*draws.length)];
             funcNow();
-            drawShadow(dropBlock);
             canHold = true;
         }
         else{
@@ -1028,7 +1004,6 @@ async function main(){
                     dropTetronimo(dropBlock);
                     render();
                 }
-                drawShadow(dropBlock);
                 if(change&&!dropFinished){
                     listScore = scoreReinitialize(tetrisLevel)
                     score += listScore[listScore.length-1];
@@ -1059,27 +1034,6 @@ async function main(){
 document.addEventListener('DOMContentLoaded', domloaded, false);
 document.addEventListener("keydown", dealWithKeyboard, false);
 document.addEventListener("keyup", keyboardEnded, false);
-document.addEventListener("click", mouseClicked, false);
-
-function mouseClicked(){
-    if(!gameOn){
-        return 0;
-    }
-    while(!dropFinished){
-        dropTetronimo(dropBlock);
-        if(!dropFinished){
-            listScore = scoreReinitialize(tetrisLevel)
-            score += listScore[listScore.length-1];
-        }
-    }
-    dropNum = dropNum + dropNum%2
-    dropFinished = true;
-    drawShadow(dropBlock);
-    render();
-    spaced = true;
-    return 0;
-}
-
 function dealWithKeyboard(e){
     if(!gameOn){
         return 0;
@@ -1097,34 +1051,14 @@ function dealWithKeyboard(e){
         }
 
         else{
-            
-            showNextFunc(nextFunc);
             writeNext();
-            writeScore(score);
-            render();
-            holdFinished = true
-            showNextFunc(nextFunc);
-            var start = coordinateToLocation(-5, 7)
-            var startX = start[0]
-            var startY = start[1]
-            var end = coordinateToLocation(-.4, 11)
-            var endX = end[0]
-            var endY = end[1]
-            canvas2d.fillStyle = backgroundColor;
-            canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
-            holdBlock(-4,8,false);
             writeHold();
+            writeScore(score);
             render();
 
         }
-        drawShadow(dropBlock);
         return 0;
     }
-    if(paused){
-        return 0;
-    }
-
-
     switch(e.keyCode){
         case 16:
             if(holdBlock === 0 && canHold){
@@ -1147,7 +1081,6 @@ function dealWithKeyboard(e){
                 canvas2d.fillRect(startX, startY, endX-startX, endY-startY);
                 holdBlock(-4,8,false);
                 writeHold();
-                drawShadow(dropBlock);
                 render();
             }
             else if(canHold){
@@ -1168,7 +1101,6 @@ function dealWithKeyboard(e){
                 holdFinished = true
                 holdBlock(-4,8,false);
                 writeHold();
-                drawShadow(dropBlock);
                 render();
             
             }
@@ -1181,7 +1113,6 @@ function dealWithKeyboard(e){
         case 37:
             if(!dropFinished){
                 moveTetronimo(dropBlock,false)
-                drawShadow(dropBlock);
                 render();
             }
             break;
@@ -1189,19 +1120,20 @@ function dealWithKeyboard(e){
         case 38:
             if(!ifSquare && !ifLine && !dropFinished){
                 rotateTetronimoBox(dropBlock, dropPivot);
+                render();
             }
             
             if(ifLine && !dropFinished){
                 rotateTetronimoLine(dropBlock);
+                render();
+                break
             }
-            drawShadow(dropBlock);
             render();
             break;
 
         case 39:
             if(!dropFinished){
                 moveTetronimo(dropBlock,true)
-                drawShadow(dropBlock);
                 render();
             }
             break;
@@ -1223,7 +1155,6 @@ function dealWithKeyboard(e){
             }
             dropNum = dropNum + dropNum%2
             dropFinished = true;
-            drawShadow(dropBlock);
             render();
             spaced = true;
             break;
@@ -1233,7 +1164,7 @@ function keyboardEnded(e){
     switch(e.keyCode){
         case 40:
             if(change){
-                time = timeHolder;
+                time*=speed;
             }
             change = false;
     }
